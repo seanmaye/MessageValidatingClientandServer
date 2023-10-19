@@ -10,7 +10,7 @@ def main():
     # Read keys from the key file
     with open(key_file, 'r') as key_file:
         keys = [line.strip() for line in key_file]
-    print(keys)
+    
     # Create a socket and bind it to the specified port
     server_socket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
@@ -36,7 +36,7 @@ def main():
                 while True:
                     
                     command = conn.recv(1024).decode().strip()
-                    print(command)
+                    #print(command)
                     if not command:
                         break
 
@@ -75,14 +75,12 @@ def main():
                             break
                         conn.send(b"260 OK\n"+b"\r")
                         print(b"260 OK\n"+b"\r")
-                    elif command == ".":
-                        conn.send(b"260 OK\n"+b"\r")
-                        print(b"260 OK\n"+b"\r")
                     elif command == "QUIT":
                         conn.close()
                         return
 
                     else:
+                        print("closing connection")
                         conn.close()
                         return
 

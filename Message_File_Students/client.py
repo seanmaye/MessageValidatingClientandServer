@@ -29,7 +29,7 @@ def main():
             # Send a "HELLO" message to the server
             client_socket.send(b"HELLO\n"+b"\r")
             response = client_socket.recv(1024).decode().strip()
-            print(response)
+            #print(response)
             if response != "260 OK":
                 
                 return
@@ -40,19 +40,19 @@ def main():
             for message in messages:
                 # Send the DATA command to the server
                 client_socket.send(b"DATA\n"+b"\r")
-                client_socket.send(message)
+                client_socket.send(message+b"\r")
                 print(b"DATA\n"+b"\r")
-                print(message)
+                print(message+b"\r")
                 response = client_socket.recv(1024).decode().strip()
-                print(response)
+                #print(response)
                 if response != "270 SIG":
                     
                     return
 
                 # Compare the received signature with the stored signature
                 received_signature = client_socket.recv(1024).decode().strip()
-                print(received_signature)
-                print(signatures[message_counter])
+                #print(received_signature)
+                #print(signatures[message_counter])
                 if received_signature == signatures[message_counter]:
                     client_socket.send(b"PASS\n"+b"\r")
                     print(b"PASS\n"+b"\r")
@@ -60,17 +60,17 @@ def main():
                     client_socket.send(b"FAIL\n"+b"\r")
                     print(b"Fail\n"+b"\r")
                 response = client_socket.recv(1024).decode().strip()
-                print(response)
+                #print(response)
 
                 if response != "260 OK":
                     
                     return
 
                 message_counter += 1
-            client_socket.send(b".\n"+b"\r")    
+                client_socket.send(b".\n"+b"\r") 
+                print(b"\.\n"+b"\r")   
+            
             # Send a QUIT message to the server
-            response = client_socket.recv(1024).decode().strip()
-            if response== "260 OK":
                 client_socket.send(b"QUIT\n"+b"\r")
                 print(b"QUIT\n"+b"\r")
 
