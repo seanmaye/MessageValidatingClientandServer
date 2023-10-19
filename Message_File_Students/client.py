@@ -27,7 +27,7 @@ def main():
             client_socket.connect((server_address, int(port)))
 
             # Send a "HELLO" message to the server
-            client_socket.send(b"HELLO\n")
+            client_socket.send(b"HELLO\n"+b"\r")
             response = client_socket.recv(1024).decode().strip()
             print(response)
             if response != "260 OK":
@@ -39,9 +39,9 @@ def main():
             # Iterate through messages
             for message in messages:
                 # Send the DATA command to the server
-                client_socket.send(b"DATA\n")
+                client_socket.send(b"DATA\n"+b"\r")
                 client_socket.send(message)
-                print(b"DATA\n")
+                print(b"DATA\n"+b"\r")
                 print(message)
                 response = client_socket.recv(1024).decode().strip()
                 print(response)
@@ -54,11 +54,11 @@ def main():
                 print(received_signature)
                 print(signatures[message_counter])
                 if received_signature == signatures[message_counter]:
-                    client_socket.send(b"PASS\n")
-                    print(b"PASS\n")
+                    client_socket.send(b"PASS\n"+b"\r")
+                    print(b"PASS\n"+b"\r")
                 else:
-                    client_socket.send(b"FAIL\n")
-                    print(b"Fail\n")
+                    client_socket.send(b"FAIL\n"+b"\r")
+                    print(b"Fail\n"+b"\r")
                 response = client_socket.recv(1024).decode().strip()
                 print(response)
 
@@ -67,10 +67,12 @@ def main():
                     return
 
                 message_counter += 1
-            client_socket.send(b".\n")    
+            client_socket.send(b".\n"+b"\r")    
             # Send a QUIT message to the server
-            client_socket.send(b"QUIT\n")
-            print(b"QUIT\n")
+            response = client_socket.recv(1024).decode().strip()
+            if response== "260 OK":
+                client_socket.send(b"QUIT\n"+b"\r")
+                print(b"QUIT\n"+b"\r")
 
     except Exception as e:
         print(f"Error: {str(e)}")
