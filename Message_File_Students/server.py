@@ -26,6 +26,7 @@ def main():
                 
 
                 # Read the first line from the client
+                print("waiting for first line from client")
                 hello_message = conn.recv(1024).decode().strip()
                 
                 if hello_message != "HELLO":
@@ -34,18 +35,15 @@ def main():
                     continue
                 conn.send(b"260 OK\n"+b"\r")
                 while True:
-                    
+                    print("waiting for data quit etc")
                     command = conn.recv(1024).decode().strip()
-                    #print(command)
+                    print(command)
                     if not command:
                         break
 
                     if command == "DATA":
-                        # Start a new SHA-256 hash
-                    
-                        
-
                         sha256 = hashlib.sha256()
+                        print("waiting for data")
                         data_line = conn.recv(1024).decode().strip()
                         print(data_line)
                         if data_line == ".":
@@ -67,6 +65,7 @@ def main():
                         # Send the signature on one line
                         conn.send(signature.encode() + b"\n"+b"\r")
                         print(signature.encode() + b"\n" +b"\r")
+                        print("waiting for pass fail response")
                         response = conn.recv(1024).decode().strip()
                         
                         if response not in ["PASS", "FAIL"]:
