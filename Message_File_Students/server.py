@@ -1,7 +1,7 @@
 import socket
 import sys
 import hashlib
-
+import time
 def main():
 
     listen_port = int(sys.argv[1])
@@ -23,30 +23,32 @@ def main():
             key_index=0
             conn, addr = server_socket.accept()
             with conn:
-                
-
+                recieved_data =conn.makefile('r',encoding='ascii', newline='')
                 # Read the first line from the client
                 print("waiting for first line from client")
-                hello_message = conn.recv(1024).decode().strip()
+                hello_message = recieved_data.readline()
                 
-                if hello_message != "HELLO":
+                if hello_message != "HELLO\n":
                     
                     conn.close()
                     continue
-                conn.send(b"260 OK\n"+b"\r")
+                conn.send("260 OK\n".encode(encoding='ascii'))
+                print("260 OK\n", end='')
                 while True:
                     print("waiting for data quit etc")
-                    command = conn.recv(1024).decode().strip()
+                    command =recieved_data.readline()
                     print(command)
                     if not command:
                         break
 
-                    if command == "DATA":
+                    if command == "DATA\n":
+                        #maybe add while here
                         sha256 = hashlib.sha256()
                         print("waiting for data")
-                        data_line = conn.recv(1024).decode().strip()
+                        data_line = recieved_data.readline().strip
                         print(data_line)
                         if data_line == ".":
+                            print("period detected")
                             break
                         escaped_line = data_line.replace("\\n", "\n").replace("\\t", "\t")
                        
@@ -59,22 +61,23 @@ def main():
                         key_index+=1
 
                         # Send 270 SIG status code back to the client
-                        conn.send(b"270 SIG\n"+b"\r")
-                        print(b"270 SIG\n"+b"\r")
+                        conn.send("270 SIG\n".encode(encoding='ascii'))
+                        print("270 SIG\n", end='')
+                        
 
                         # Send the signature on one line
-                        conn.send(signature.encode() + b"\n"+b"\r")
-                        print(signature.encode() + b"\n" +b"\r")
+                        conn.send((signature+"\n").encode(encoding='ascii'))
+                        print(signature+"\n", end='')
                         print("waiting for pass fail response")
-                        response = conn.recv(1024).decode().strip()
+                        response = recieved_data.readline()
                         
-                        if response not in ["PASS", "FAIL"]:
+                        if response not in ["PASS\n", "FAIL\n"]:
                            
                             conn.close()
                             break
-                        conn.send(b"260 OK\n"+b"\r")
-                        print(b"260 OK\n"+b"\r")
-                    elif command == "QUIT":
+                        conn.send("260 OK\n".encode(encoding='ascii'))
+                        print("260 OK\n", end='')
+                    elif command == "QUIT\n":
                         conn.close()
                         return
 

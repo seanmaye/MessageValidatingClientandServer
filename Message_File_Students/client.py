@@ -25,14 +25,14 @@ def main():
         # Open a TCP socket to the server
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((server_address, int(port)))
-
+            received_data = client_socket.makefile('r',encoding='ascii',newline='')
             # Send a "HELLO" message to the server
-            client_socket.send(b"HELLO\n"+b"\r")
+            client_socket.send("HELLO\n".encode(encoding='ascii'))
             print("waiting for response after hello")
-            response = client_socket.recv(1024).decode().strip()
+            response = received_data.readline()
             print(response)
-            if response != "260 OK":
-                
+            if response != "260 OK\n":
+                print("fuck")
                 return
 
             message_counter = 0
@@ -40,35 +40,35 @@ def main():
             # Iterate through messages
             for message in messages:
                 # Send the DATA command to the server
-                client_socket.send(b"DATA\n"+b"\r")
-                client_socket.send(message+b"\r")
-                print(b"DATA\n"+b"\r")
-                print(message+b"\r")
-                client_socket.send(b"."+b"\r") 
-                print(b"."+b"\r") 
+                client_socket.send("DATA\n".encode(encoding='ascii'))
+                client_socket.send(message+"\n".encode(encoding='ascii'))
+                print("DATA\n", end='')
+                print(message,end='')
+                #client_socket.send(".\n".encode(encoding=ascii)) 
+                print("."+"\n", end='') 
                 print("waiting for response after DATA and message")
-                response = client_socket.recv(1024).decode().strip()
-                print(response)
-                if response != "270 SIG":
+                response = received_data.readline()
+                print("Response after sending data and message: "+response)
+                if response != "270 SIG\n":
                     
                     return "response not sig"
 
                 # Compare the received signature with the stored signature
                 print("waiting for signature")
                 received_signature = client_socket.recv(1024).decode().strip()
-                print(received_signature)
-                print(signatures[message_counter])
+                print("Received signature: "+received_signature)
+                print("Our signature: "+ signatures[message_counter])
                 if received_signature == signatures[message_counter]:
-                    client_socket.send(b"PASS\n"+b"\r")
-                    print(b"PASS\n"+b"\r")
+                    client_socket.send("PASS\n".encode(encoding='ascii'))
+                    print("PASS\n", end='')
                 else:
-                    client_socket.send(b"FAIL\n"+b"\r")
-                    print(b"Fail\n"+b"\r")
+                    client_socket.send("FAIL\n".encode(encoding='ascii'))
+                    print("FAIL\n",end='')
                 print("response after pass or fail")
-                response = client_socket.recv(1024).decode().strip()
+                response = received_data.readline()
                 print(response)
 
-                if response != "260 OK":
+                if response != "260 OK\n":
                     
                     return
 
