@@ -51,7 +51,7 @@ def main():
                
                 print(".\n") 
                 print("waiting for response after DATA and message")
-                response = client_socket.recv(1024).decode()
+                response = client_socket.recv(8).decode()
                 print("Sig response:"+response)
                 if response != "270 SIG\n":
                     
@@ -60,7 +60,7 @@ def main():
                 # Compare the received signature with the stored signature
                 print("waiting for signature")
                 received_signature = client_socket.recv(1024).decode().strip()
-                print(received_signature)
+                print("recieved sig " +received_signature,end='')
                 print(signatures[message_counter])
                 if received_signature == signatures[message_counter]:
                     client_socket.send(b"PASS\n")
@@ -68,12 +68,13 @@ def main():
                 else:
                     client_socket.send(b"FAIL\n")
                     print("FAIL\n",end='')
-                print("response after pass or fail: ")
+                print("response after pass or fail: ", end='')
                 response = client_socket.recv(1024).decode()
-                print(response)
+    
+                print(response+"after")
 
                 if response != "260 OK\n":
-                    
+                    print("we here")
                     return
 
                 message_counter += 1
