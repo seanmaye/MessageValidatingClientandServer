@@ -1,5 +1,6 @@
 import socket
 import sys
+import time
 
 def main():
     message_file = sys.argv[3]
@@ -27,11 +28,11 @@ def main():
             client_socket.connect((server_address, int(port)))
 
             # Send a "HELLO" message to the server
-            client_socket.send(b"HELLO\n"+b"\r")
+            client_socket.send(b"HELLO\n")
             print("waiting for response after hello")
-            response = client_socket.recv(1024).decode().strip()
+            response = client_socket.recv(1024).decode()
             print(response)
-            if response != "260 OK":
+            if response != "260 OK\n":
                 
                 return
 
@@ -40,16 +41,19 @@ def main():
             # Iterate through messages
             for message in messages:
                 # Send the DATA command to the server
-                client_socket.send(b"DATA\n"+b"\r")
-                client_socket.send(message+b"\r")
-                print(b"DATA\n"+b"\r")
-                print(message+b"\r")
-                client_socket.send(b"."+b"\r") 
-                print(b"."+b"\r") 
+                client_socket.send(b"DATA\n")
+                
+                client_socket.send(message)
+                
+                print("DATA\n")
+                print(message)
+                client_socket.send(b".\n") 
+               
+                print(".\n") 
                 print("waiting for response after DATA and message")
-                response = client_socket.recv(1024).decode().strip()
-                print(response)
-                if response != "270 SIG":
+                response = client_socket.recv(1024).decode()
+                print("Sig response:"+response)
+                if response != "270 SIG\n":
                     
                     return "response not sig"
 
@@ -59,16 +63,16 @@ def main():
                 print(received_signature)
                 print(signatures[message_counter])
                 if received_signature == signatures[message_counter]:
-                    client_socket.send(b"PASS\n"+b"\r")
-                    print(b"PASS\n"+b"\r")
+                    client_socket.send(b"PASS\n")
+                    print("PASS\n",end='')
                 else:
-                    client_socket.send(b"FAIL\n"+b"\r")
-                    print(b"Fail\n"+b"\r")
-                print("response after pass or fail")
-                response = client_socket.recv(1024).decode().strip()
+                    client_socket.send(b"FAIL\n")
+                    print("FAIL\n",end='')
+                print("response after pass or fail: ")
+                response = client_socket.recv(1024).decode()
                 print(response)
 
-                if response != "260 OK":
+                if response != "260 OK\n":
                     
                     return
 
@@ -78,8 +82,8 @@ def main():
             
             
             # Send a QUIT message to the server
-            client_socket.send(b"QUIT\n"+b"\r")
-            print(b"QUIT\n"+b"\r")
+            client_socket.send(b"QUIT\n")
+            print(b"QUIT\n")
 
     except Exception as e:
         print(f"Error: {str(e)}")
