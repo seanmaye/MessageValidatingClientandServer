@@ -18,12 +18,13 @@ def main():
     server_socket.listen(1)
 
        
-
+       
     while True:
             key_index=0
             conn, addr = server_socket.accept()
             with conn:
                 
+                received_data = conn.makefile('r', encoding = 'ascii', newline='')
 
                 # Read the first line from the client
                 print("waiting for first line from client")
@@ -36,7 +37,7 @@ def main():
                 conn.send(b"260 OK\n")
                 while True:
                     print("waiting for data quit etc")
-                    command = conn.recv(5).decode()
+                    command = received_data.readline()
                     print("data quit etc " +command)
                     if not command:
                         break
@@ -44,19 +45,18 @@ def main():
                     if command == "DATA\n":
                         sha256 = hashlib.sha256()
                         print("waiting for data")
-                        recieved = conn.recv(1).decode()
-                        data_line = ""
-                        print("Dataline: "+data_line)
+                        recieved = received_data.readline()
+                        data_line = ''
+                        print("Current line: "+recieved)
 
-                        while(recieved!="."):
-                            data_line = data_line+ recieved
-                            recieved=conn.recv(1).decode()
-                            #print(data_line)
+                        while(recieved!=".\n"):
+                            data_line = data_line+recieved
+                            recieved=received_data.readline()
+                            print("Current line: "+recieved)
                         
-                        
-                            
-                        escaped_line = data_line.replace("\\n", "\n").replace("\\t", "\t")
-                       
+                          
+                        escaped_line = data_line.replace("\\n", "\n").replace("\\t", "\t").replace("\.",".").strip()
+                        print("escaped line: "+escaped_line)
                         sha256.update(escaped_line.encode())
                         
                         # Add the key to the hash and finish the hash
@@ -75,7 +75,7 @@ def main():
                             
                         print(signature+"\n",end='')
                         print("waiting for pass fail response\n",end='')
-                        response = conn.recv(1024).decode()
+                        #response = conn.recv(1024).decode()
                         response = conn.recv(1024).decode()
                         print("response: "+response+"after",end='')
                         if response not in ["PASS\n", "FAIL\n"]:

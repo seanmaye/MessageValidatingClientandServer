@@ -43,7 +43,7 @@ def main():
                 # Send the DATA command to the server
                 client_socket.send(b"DATA\n")
                 
-                client_socket.send(message)
+                client_socket.send(message+b"\n")
                 
                 print("DATA\n")
                 print(message)
@@ -60,8 +60,8 @@ def main():
                 # Compare the received signature with the stored signature
                 print("waiting for signature")
                 received_signature = client_socket.recv(1024).decode().strip()
-                print("recieved sig " +received_signature,end='')
-                print(signatures[message_counter])
+                print("recieved sig " +received_signature+"\n",end='')
+                print("Our sig      " +signatures[message_counter])
                 if received_signature == signatures[message_counter]:
                     client_socket.send(b"PASS\n")
                     print("PASS\n",end='')
