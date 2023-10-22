@@ -1,5 +1,6 @@
 import socket
 import sys
+import time
 
 def main():
     message_file = sys.argv[3]
@@ -27,10 +28,11 @@ def main():
             client_socket.connect((server_address, int(port)))
 
             # Send a "HELLO" message to the server
-            client_socket.send(b"HELLO\n"+b"\r")
-            response = client_socket.recv(1024).decode().strip()
+            client_socket.send(b"HELLO\n")
+            print("waiting for response after hello")
+            response = client_socket.recv(1024).decode()
             print(response)
-            if response != "260 OK":
+            if response != "260 OK\n":
                 
                 return
 
@@ -39,40 +41,47 @@ def main():
             # Iterate through messages
             for message in messages:
                 # Send the DATA command to the server
-                client_socket.send(b"DATA\n"+b"\r")
-                client_socket.send(message)
-                print(b"DATA\n"+b"\r")
-                print(message)
-                response = client_socket.recv(1024).decode().strip()
-                print(response)
-                if response != "270 SIG":
+                client_socket.send(b"DATA\n")
+                
+                client_socket.send(message+b"\n")
+                
+                
+                client_socket.send(b".\n") 
+               
+                print(".\n") 
+                
+                response = client_socket.recv(8).decode()
+                print(response, end='')
+                if response != "270 SIG\n":
                     
-                    return
+                    return "response not sig"
 
                 # Compare the received signature with the stored signature
+                
                 received_signature = client_socket.recv(1024).decode().strip()
-                print(received_signature)
-                print(signatures[message_counter])
+                print(received_signature+"\n",end='')
                 if received_signature == signatures[message_counter]:
-                    client_socket.send(b"PASS\n"+b"\r")
-                    print(b"PASS\n"+b"\r")
+                    client_socket.send(b"PASS\n")
+                    
                 else:
-                    client_socket.send(b"FAIL\n"+b"\r")
-                    print(b"Fail\n"+b"\r")
-                response = client_socket.recv(1024).decode().strip()
-                print(response)
+                    client_socket.send(b"FAIL\n")
+                
+                response = client_socket.recv(1024).decode()
+    
+                print(response, end='')
 
-                if response != "260 OK":
+                if response != "260 OK\n":
                     
                     return
 
                 message_counter += 1
-            client_socket.send(b".\n"+b"\r")    
+                
+                  
+            
+            
             # Send a QUIT message to the server
-            response = client_socket.recv(1024).decode().strip()
-            if response== "260 OK":
-                client_socket.send(b"QUIT\n"+b"\r")
-                print(b"QUIT\n"+b"\r")
+            client_socket.send(b"QUIT\n")
+            
 
     except Exception as e:
         print(f"Error: {str(e)}")
