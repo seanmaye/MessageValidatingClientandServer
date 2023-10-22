@@ -45,36 +45,33 @@ def main():
                 
                 client_socket.send(message+b"\n")
                 
-                print("DATA\n")
-                print(message)
+                
                 client_socket.send(b".\n") 
                
                 print(".\n") 
-                print("waiting for response after DATA and message")
+                
                 response = client_socket.recv(8).decode()
-                print("Sig response:"+response)
+                print(response, end='')
                 if response != "270 SIG\n":
                     
                     return "response not sig"
 
                 # Compare the received signature with the stored signature
-                print("waiting for signature")
+                
                 received_signature = client_socket.recv(1024).decode().strip()
-                print("recieved sig " +received_signature+"\n",end='')
-                print("Our sig      " +signatures[message_counter])
+                print(received_signature+"\n",end='')
                 if received_signature == signatures[message_counter]:
                     client_socket.send(b"PASS\n")
-                    print("PASS\n",end='')
+                    
                 else:
                     client_socket.send(b"FAIL\n")
-                    print("FAIL\n",end='')
-                print("response after pass or fail: ", end='')
+                
                 response = client_socket.recv(1024).decode()
     
-                print(response+"after")
+                print(response, end='')
 
                 if response != "260 OK\n":
-                    print("we here")
+                    
                     return
 
                 message_counter += 1
@@ -84,7 +81,7 @@ def main():
             
             # Send a QUIT message to the server
             client_socket.send(b"QUIT\n")
-            print(b"QUIT\n")
+            
 
     except Exception as e:
         print(f"Error: {str(e)}")

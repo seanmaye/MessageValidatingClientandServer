@@ -29,38 +29,37 @@ def main():
                 # Read the first line from the client
                 print("waiting for first line from client")
                 hello_message = conn.recv(1024).decode()
-                
+                print(hello_message, end='')
                 if hello_message != "HELLO\n":
                     print("not hello")
                     conn.close()
                     continue
                 conn.send(b"260 OK\n")
                 while True:
-                    print("waiting for data quit etc")
+                    
                     command = received_data.readline()
-                    print("data quit etc " +command)
+                    print(command,end='')
                     if not command:
                         break
 
                     if command == "DATA\n":
                         sha256 = hashlib.sha256()
-                        print("waiting for data")
                         recieved = received_data.readline()
                         data_line = ''
-                        print("Current line: "+recieved)
+                        
 
                         while(recieved!=".\n"):
                             data_line = data_line+recieved
                             recieved=received_data.readline()
-                            print("Current line: "+recieved)
+                            
                         
                           
                         escaped_line = data_line.replace("\\n", "\n").replace("\\t", "\t").replace("\.",".").strip()
-                        print("escaped line: "+escaped_line)
+                        
                         sha256.update(escaped_line.encode())
                         
                         # Add the key to the hash and finish the hash
-                        print(key_index)
+                        
                         sha256.update(keys[key_index].encode())
                         signature = sha256.hexdigest()
                         key_index+=1
@@ -74,17 +73,15 @@ def main():
                         conn.send(signature.encode() + b"\n")
                             
                         print(signature+"\n",end='')
-                        print("waiting for pass fail response\n",end='')
-                        #response = conn.recv(1024).decode()
+                        
+                        
                         response = conn.recv(1024).decode()
-                        print("response: "+response+"after",end='')
+                        print(response,end='')
                         if response not in ["PASS\n", "FAIL\n"]:
                            
                             conn.close()
                             break
                         conn.send(b"260 OK\n")
-                           
-                        print("260 OK\n",end='')
                     elif command == "QUIT\n":
                         conn.close()
                         return
